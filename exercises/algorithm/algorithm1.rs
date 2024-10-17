@@ -2,11 +2,11 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
+
 
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
-use std::vec::*;
+//use std::vec::*;
 
 #[derive(Debug)]
 struct Node<T> {
@@ -69,15 +69,44 @@ impl<T> LinkedList<T> {
             },
         }
     }
-	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
-	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
+	pub fn merge(mut list_a: LinkedList<T>, mut list_b: LinkedList<T>) -> Self
+where
+    T: Ord + Clone,
+{
+    let mut result = LinkedList::new();
+
+    let mut ptr_a = list_a.start;
+    let mut ptr_b = list_b.start;
+
+    while let (Some(a_ptr), Some(b_ptr)) = (ptr_a, ptr_b) {
+        let a_val = unsafe { &(*a_ptr.as_ptr()).val };
+        let b_val = unsafe { &(*b_ptr.as_ptr()).val };
+
+        if a_val <= b_val {
+            result.add(a_val.clone()); // a_val 是 T 类型，所以可以直接克隆
+            ptr_a = unsafe { (*a_ptr.as_ptr()).next };
+        } else {
+            result.add(b_val.clone()); // b_val 是 T 类型，所以可以直接克隆
+            ptr_b = unsafe { (*b_ptr.as_ptr()).next };
         }
-	}
+    }
+
+    while let Some(a_ptr) = ptr_a {
+        let a_val = unsafe { &(*a_ptr.as_ptr()).val };
+        result.add(a_val.clone());
+        ptr_a = unsafe { (*a_ptr.as_ptr()).next };
+    }
+
+    while let Some(b_ptr) = ptr_b {
+        let b_val = unsafe { &(*b_ptr.as_ptr()).val };
+        result.add(b_val.clone());
+        ptr_b = unsafe { (*b_ptr.as_ptr()).next };
+    }
+
+    result
+}
+
+    
 }
 
 impl<T> Display for LinkedList<T>

@@ -2,7 +2,7 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
+
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -23,7 +23,7 @@ where
     pub fn new(comparator: fn(&T, &T) -> bool) -> Self {
         Self {
             count: 0,
-            items: vec![T::default()],
+            items: vec![T::default()], // Placeholder for 1-based indexing
             comparator,
         }
     }
@@ -37,8 +37,24 @@ where
     }
 
     pub fn add(&mut self, value: T) {
-        //TODO
+        // Add new item to the end
+        self.items.push(value);
+        self.count += 1;
+        
+        // Bubble up
+        let mut idx = self.count;
+        while idx > 1 {
+            let parent_idx = self.parent_idx(idx);
+            // If the current item is less than its parent (for min-heap), swap
+            if (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+                self.items.swap(idx, parent_idx);
+                idx = parent_idx; // Move up to the parent's index
+            } else {
+                break; // If the heap property is satisfied, break
+            }
+        }
     }
+    
 
     fn parent_idx(&self, idx: usize) -> usize {
         idx / 2
@@ -57,8 +73,14 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left = self.left_child_idx(idx);
+        let right = self.right_child_idx(idx);
+        
+        if right <= self.count && (self.comparator)(&self.items[right], &self.items[left]) {
+            right
+        } else {
+            left
+        }
     }
 }
 
@@ -84,8 +106,28 @@ where
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        //TODO
-		None
+        if self.is_empty() {
+            return None;
+        }
+
+        // Swap root with last item, remove the last item
+        self.items.swap(1, self.count);
+        let result = self.items.pop();
+        self.count -= 1;
+
+        // Bubble down the new root
+        let mut idx = 1;
+        while self.children_present(idx) {
+            let smallest = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[smallest], &self.items[idx]) {
+                self.items.swap(smallest, idx);
+                idx = smallest;
+            } else {
+                break;
+            }
+        }
+
+        result
     }
 }
 
